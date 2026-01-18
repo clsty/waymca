@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Service
-X-KDE-ServiceTypes=KCModule
-X-KDE-Library=kcm_kwin_effects
-X-KDE-ParentComponents=waymca
-Name=WayMCA
-Comment=Configure the WayMCA effect
-Icon=preferences-desktop-effect
