@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "KWin/Effect",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "waymca@example.com",
+                "Name": "WayMCA Team"
+            }
+        ],
+        "Category": "Appearance",
+        "Description": "Simulates myopic chromatic aberration for myopia control",
+        "EnabledByDefault": false,
+        "Id": "waymca",
+        "License": "GPL-3.0",
+        "Name": "WayMCA",
+        "Version": "1.0.0",
+        "Website": "https://github.com/clsty/waymca"
+    },
+    "X-Plasma-API": "declarativescript"
+}
