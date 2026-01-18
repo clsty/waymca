@@ -1,0 +1,25 @@
+# Build artifacts
+build/
+*.o
+*.so
+*.a
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.kate-swp
+
+# macOS
+.DS_Store
+
+# Temporary files
+/tmp/
+*.tmp
+*.bak
+
+# Package files (if created)
+*.tar.gz
+*.zip

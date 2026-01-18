@@ -19,7 +19,7 @@ These changes suggest a potential inhibitory effect on myopia progression.
 
 ## Installation
 
-### Method 1: Manual Installation
+### Method 1: Quick Installation (Recommended)
 
 1. Clone this repository:
 ```bash
@@ -27,21 +27,12 @@ git clone https://github.com/clsty/waymca.git
 cd waymca
 ```
 
-2. Install the effect:
+2. Run the installation script:
 ```bash
-# Create the KWin effects directory if it doesn't exist
-mkdir -p ~/.local/share/kwin/effects
-
-# Copy the effect to the KWin effects directory
-cp -r metadata.json contents ~/.local/share/kwin/effects/waymca/
+./install.sh
 ```
 
-3. Restart KWin:
-```bash
-kwin_x11 --replace &  # For X11
-# or
-kwin_wayland --replace &  # For Wayland
-```
+3. Follow the on-screen instructions to restart KWin and enable the effect.
 
 ### Method 2: Using kpackagetool6
 
@@ -57,6 +48,35 @@ kpackagetool6 --type=KWin/Effect --upgrade .
 To uninstall:
 ```bash
 kpackagetool6 --type=KWin/Effect --remove waymca
+```
+
+### Method 3: Manual Installation
+
+If you prefer to install manually:
+
+```bash
+# Create the KWin effects directory if it doesn't exist
+mkdir -p ~/.local/share/kwin/effects/waymca
+
+# Copy the effect files
+cp metadata.json ~/.local/share/kwin/effects/waymca/
+cp -r contents ~/.local/share/kwin/effects/waymca/
+
+# Restart KWin
+kwin_x11 --replace &  # For X11
+# or log out and log back in for Wayland
+```
+
+### Uninstallation
+
+To remove the effect, run:
+```bash
+./uninstall.sh
+```
+
+Or manually:
+```bash
+rm -rf ~/.local/share/kwin/effects/waymca
 ```
 
 ## Configuration
