@@ -1,0 +1,25 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "",
+                "Name": "WayMCA Contributors"
+            }
+        ],
+        "Category": "Appearance",
+        "Description": "Simulates myopic chromatic aberration for myopia prevention/control",
+        "EnabledByDefault": false,
+        "Icon": "preferences-desktop-effect-waymca",
+        "License": "GPL-3.0",
+        "Name": "WayMCA",
+        "Version": "1.0",
+        "Website": ""
+    },
+    "X-KDE-ServiceTypes": [
+        "KWin/Effect"
+    ],
+    "X-Plasma-API": "cpp",
+    "X-KWin-Effect-Category": "Appearance",
+    "X-KWin-Exclusive-Category": "",
+    "X-KWin-Video-Mode-Dependency": "OpenGL"
+}

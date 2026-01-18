@@ -1,0 +1,51 @@
+# Build directories
+build/
+build-*/
+_build/
+cmake-build-*/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Makefile
+
+# Generated files
+*.moc
+moc_*.cpp
+ui_*.h
+*config.cpp.moc
+waymcaconfig.h
+waymcaconfig.cpp
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.so
+*.so.*
+
+# Executables
+*.out
+*.app
+
+# Qt
+*.qmake.stash
+.qmake.cache
+
+# IDE
+.vscode/
+.idea/
+*.user
+*.pro.user
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*.log
