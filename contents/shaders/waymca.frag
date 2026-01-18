@@ -11,6 +11,8 @@ uniform sampler2D sampler;
 uniform float greenBlurRadius;
 uniform float blueBlurRadius;
 uniform float useGaussianBlur;
+uniform float fullScreenBlur;
+uniform float fullScreenBlurRadius;
 
 // Gaussian blur weights for a 9-tap kernel (normalized, sum = 1.0)
 // Using a standard 3x3 Gaussian kernel with sigma = 1.0
@@ -29,7 +31,7 @@ vec3 boxBlur(vec2 texCoord, float radius) {
         return texture(sampler, texCoord).rgb;
     }
     
-    vec2 pixelSize = vec2(1.0) / textureSize(sampler, 0);
+    vec2 pixelSize = vec2(1.0) / vec2(textureSize(sampler, 0));
     float radiusInt = floor(radius);
     
     for (float x = -radiusInt; x <= radiusInt; x += 1.0) {
@@ -52,7 +54,7 @@ vec3 gaussianBlur(vec2 texCoord, float radius) {
         return texture(sampler, texCoord).rgb;
     }
     
-    vec2 pixelSize = vec2(1.0) / textureSize(sampler, 0);
+    vec2 pixelSize = vec2(1.0) / vec2(textureSize(sampler, 0));
     float radiusScale = radius / 3.0; // Scale the kernel based on radius
     
     int idx = 0;
@@ -74,6 +76,19 @@ void main() {
     // Get the original pixel
     vec4 originalColor = texture(sampler, texCoord);
     
+    // Debug mode: Full-screen blur
+    if (fullScreenBlur > 0.5) {
+        vec3 blurred;
+        if (useGaussianBlur > 0.5) {
+            blurred = gaussianBlur(texCoord, fullScreenBlurRadius);
+        } else {
+            blurred = boxBlur(texCoord, fullScreenBlurRadius);
+        }
+        fragColor = vec4(blurred, originalColor.a);
+        return;
+    }
+    
+    // Normal mode: Per-channel blur
     // Red channel stays sharp (no blur)
     float red = originalColor.r;
     

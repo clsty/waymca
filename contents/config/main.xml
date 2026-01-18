@@ -18,5 +18,13 @@
         <entry name="UseGaussianBlur" type="Bool">
             <default>true</default>
         </entry>
+        <entry name="FullScreenBlur" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="FullScreenBlurRadius" type="Int">
+            <default>10</default>
+            <min>0</min>
+            <max>50</max>
+        </entry>
     </group>
 </kcfg>
