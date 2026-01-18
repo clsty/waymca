@@ -11,11 +11,11 @@ waymca/
 ├── metadata.json              # KPackage metadata
 ├── contents/
 │   ├── config/
-│   │   ├── main.xml          # Configuration schema (KConfigXT)
-│   │   └── waymca_config.desktop  # Configuration module entry
+│   │   └── main.xml          # Configuration schema (KConfigXT)
 │   ├── ui/
 │   │   ├── main.qml          # Main effect logic
-│   │   └── config.qml        # Configuration UI
+│   │   ├── config.ui         # Qt Designer configuration UI (used by kcm_kwin4_genericscripted)
+│   │   └── config.qml        # QML configuration UI (alternative/backup)
 │   └── shaders/
 │       └── waymca.frag       # Fragment shader (GLSL)
 ├── install.sh                # Installation script
@@ -30,8 +30,12 @@ waymca/
 Defines the KPackage structure and plugin metadata:
 - **KPackageStructure**: `KWin/Effect` - Identifies this as a KWin effect
 - **X-Plasma-API**: `declarativescript` - Uses QML/declarative implementation
+- **X-KDE-ConfigModule**: `kcm_kwin4_genericscripted` - Uses KWin's standard config module for scripted effects
+- **X-KDE-PluginKeyword**: `waymca` - Plugin identifier for the config module
 - **Id**: `waymca` - Unique identifier for the effect
 - **Category**: `Appearance` - Category in System Settings
+
+The `X-KDE-ConfigModule` field is crucial - it tells KWin to use the generic scripted effect configuration handler, which looks for `config.ui` files in the `contents/ui/` directory.
 
 ### contents/config/main.xml
 
@@ -40,15 +44,14 @@ KConfigXT schema defining three configuration options:
 - **BlueBlurRadius** (Int, 0-20, default: 8)
 - **UseGaussianBlur** (Bool, default: true)
 
-### contents/config/waymca_config.desktop
+### contents/ui/config.ui
 
-Desktop entry file that registers the configuration module with KWin:
-- **Type**: Service
-- **X-KDE-ServiceTypes**: KCModule
-- **X-KDE-Library**: kcm_kwin_effects
-- **X-KDE-ParentComponents**: waymca
+Qt Designer UI file that defines the configuration interface. This is the primary configuration UI used by `kcm_kwin4_genericscripted`. Widget names must follow the pattern `kcfg_<ConfigName>` to automatically bind to the KConfigXT entries. For example:
+- `kcfg_GreenBlurRadius` binds to the `GreenBlurRadius` config entry
+- `kcfg_BlueBlurRadius` binds to the `BlueBlurRadius` config entry
+- `kcfg_UseGaussianBlur` binds to the `UseGaussianBlur` config entry
 
-This file is essential for the "Configure" button to appear in System Settings → Desktop Effects. Without it, the effect will be listed but won't show configuration options.
+This file is essential for the "Configure" button to work in System Settings → Desktop Effects.
 
 ### contents/ui/main.qml
 
@@ -60,11 +63,13 @@ Main effect implementation using:
 
 ### contents/ui/config.qml
 
-Configuration UI using:
+QML-based configuration UI (alternative, not currently used):
 - **SimpleKCM**: KDE Config Module base component
 - **Slider**: For blur radius adjustment (0-20 pixels)
 - **CheckBox**: For Gaussian blur toggle
 - Property aliases bind UI controls to configuration values
+
+Note: This file is kept for reference but is not actively used. The `kcm_kwin4_genericscripted` module uses `config.ui` instead. This QML file could be used if the effect were to implement a custom configuration module in the future.
 
 ### contents/shaders/waymca.frag
 
@@ -167,7 +172,8 @@ Future improvements could include:
 
 The effect appears in:
 - **Desktop Effects** list with name "WayMCA"
-- **Configure** button opens config.qml
+- **Configure** button opens the UI defined in `config.ui`
+- Configuration uses the `kcm_kwin4_genericscripted` module
 - Changes are saved to `~/.config/kwinrc`
 
 ## Installation Details
