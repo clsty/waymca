@@ -31,14 +31,32 @@ find_package(epoxy REQUIRED)
 # Try to find KWin package - in some distributions it might be named differently
 find_package(KWin QUIET)
 if(NOT KWin_FOUND)
-    # Fallback: try to find the library directly
+    # Fallback: try to find the library and headers directly
     find_library(KWINEFFECTS_LIB kwineffects)
     if(NOT KWINEFFECTS_LIB)
         message(FATAL_ERROR "Could not find kwineffects library. Please install kwin development files.")
     endif()
+    
+    # Find KWin include directory
+    find_path(KWIN_INCLUDE_DIR 
+        NAMES kwineffects.h
+        PATHS /usr/include /usr/local/include
+        PATH_SUFFIXES kwin
+    )
+    
+    if(NOT KWIN_INCLUDE_DIR)
+        message(FATAL_ERROR "Could not find kwineffects.h header. Please install kwin development files.")
+    endif()
+    
     # Create an imported target for kwineffects
     add_library(kwineffects SHARED IMPORTED)
-    set_target_properties(kwineffects PROPERTIES IMPORTED_LOCATION ${KWINEFFECTS_LIB})
+    set_target_properties(kwineffects PROPERTIES 
+        IMPORTED_LOCATION ${KWINEFFECTS_LIB}
+        INTERFACE_INCLUDE_DIRECTORIES ${KWIN_INCLUDE_DIR}
+    )
+    
+    message(STATUS "Found kwineffects library: ${KWINEFFECTS_LIB}")
+    message(STATUS "Found kwineffects headers: ${KWIN_INCLUDE_DIR}")
 endif()
 
 set(waymca_SOURCES
