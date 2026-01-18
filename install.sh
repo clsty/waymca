@@ -44,5 +44,5 @@ echo
 echo "3. Configure the effect (optional):"
 echo "   Click the configure button next to WayMCA in Desktop Effects"
 echo
-echo "To uninstall, run: rm -rf $INSTALL_DIR"
+echo "To uninstall, run: ./uninstall.sh"
 echo

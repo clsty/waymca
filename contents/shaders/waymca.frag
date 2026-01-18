@@ -12,11 +12,12 @@ uniform float greenBlurRadius;
 uniform float blueBlurRadius;
 uniform float useGaussianBlur;
 
-// Gaussian blur weights for a 9-tap kernel (optimized for performance)
+// Gaussian blur weights for a 9-tap kernel (normalized, sum = 1.0)
+// Using a standard 3x3 Gaussian kernel with sigma = 1.0
 const float gaussianWeights[9] = float[](
-    0.0947416, 0.1183185, 0.0947416,
-    0.1183185, 0.1477283, 0.1183185,
-    0.0947416, 0.1183185, 0.0947416
+    0.0751136, 0.1238414, 0.0751136,
+    0.1238414, 0.2041800, 0.1238414,
+    0.0751136, 0.1238414, 0.0751136
 );
 
 // Box blur (simple average)
