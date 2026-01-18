@@ -3,8 +3,6 @@ name: Build WayMCA
 on:
   push:
     branches: [ main, master, copilot/** ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -22,9 +20,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Fix git safe directory
+      run: |
+        git config --global --add safe.directory /__w/waymca/waymca
+    
     - name: Install KDE/Qt dependencies
       run: |
-        pacman -S --noconfirm kwin qt6-base
+        pacman -S --noconfirm kwin qt6-base plasma-workspace
     
     - name: Configure with CMake
       run: |

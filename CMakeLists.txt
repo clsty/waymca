@@ -27,8 +27,19 @@ find_package(KF6 REQUIRED COMPONENTS
 )
 
 find_package(epoxy REQUIRED)
-find_package(KWinEffects REQUIRED COMPONENTS kwineffects)
-find_package(KWin REQUIRED COMPONENTS kwineffects)
+
+# Try to find KWin package - in some distributions it might be named differently
+find_package(KWin QUIET)
+if(NOT KWin_FOUND)
+    # Fallback: try to find the library directly
+    find_library(KWINEFFECTS_LIB kwineffects)
+    if(NOT KWINEFFECTS_LIB)
+        message(FATAL_ERROR "Could not find kwineffects library. Please install kwin development files.")
+    endif()
+    # Create an imported target for kwineffects
+    add_library(kwineffects SHARED IMPORTED)
+    set_target_properties(kwineffects PROPERTIES IMPORTED_LOCATION ${KWINEFFECTS_LIB})
+endif()
 
 set(waymca_SOURCES
     src/waymca.cpp
