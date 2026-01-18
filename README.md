@@ -85,9 +85,11 @@ rm -rf ~/.local/share/kwin/effects/waymca
 2. Navigate to **Workspace Behavior** → **Desktop Effects**
 3. Find **WayMCA** in the list
 4. Click the **Configure** button to adjust:
-   - **Green Blur Radius**: Amount of blur for the green channel (default: 3)
-   - **Blue Blur Radius**: Amount of blur for the blue channel (default: 8)
+   - **Green Blur Radius**: Amount of blur for the green channel (default: 3, range: 0-20)
+   - **Blue Blur Radius**: Amount of blur for the blue channel (default: 8, range: 0-20)
    - **Use Gaussian Blur**: Enable for better quality blur (default: enabled)
+   - **Debug: Full-Screen Blur**: Enable to test if the effect is working (blurs entire screen)
+   - **Full-Screen Blur Radius**: Blur amount for debug mode (default: 10, range: 0-50)
 
 ## Usage
 
@@ -97,6 +99,20 @@ Once installed and configured:
 2. The effect will apply globally to your entire screen
 3. Use it during computer work sessions (recommended: 2 hours per day)
 4. Adjust blur radii based on your comfort and visual needs
+
+## Troubleshooting
+
+If you don't see any visual effect even with maximum blur settings:
+
+1. Open the WayMCA configuration dialog
+2. Enable the **"Full-Screen Blur"** debug option
+3. Set the **Full-Screen Blur Radius** to 30-50
+4. Apply the settings
+5. If the screen becomes blurred, the effect works but per-channel mode may need adjustment
+6. If nothing happens, check:
+   - KWin has been restarted after installation
+   - The effect is enabled in Desktop Effects
+   - Check KWin logs: `journalctl -f | grep kwin` for errors
 
 ## Technical Details
 
