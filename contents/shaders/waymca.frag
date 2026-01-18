@@ -78,6 +78,9 @@ void main() {
     float red = originalColor.r;
     
     // Green channel with moderate blur
+    // Note: We blur the entire image and extract the green channel because
+    // the blur algorithm needs to sample from all RGB channels to produce
+    // accurate results. This is necessary for proper chromatic aberration simulation.
     vec3 greenBlurred;
     if (useGaussianBlur > 0.5) {
         greenBlurred = gaussianBlur(texCoord, greenBlurRadius);
@@ -87,6 +90,8 @@ void main() {
     float green = greenBlurred.g;
     
     // Blue channel with more blur
+    // Separate blur operation needed because blue requires a different radius
+    // than green (typically 8px vs 3px to simulate myopic chromatic aberration)
     vec3 blueBlurred;
     if (useGaussianBlur > 0.5) {
         blueBlurred = gaussianBlur(texCoord, blueBlurRadius);
@@ -95,6 +100,6 @@ void main() {
     }
     float blue = blueBlurred.b;
     
-    // Combine the channels
+    // Combine the channels: sharp red, blurred green, strongly blurred blue
     fragColor = vec4(red, green, blue, originalColor.a);
 }

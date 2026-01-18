@@ -34,7 +34,7 @@ echo "✓ Installation complete!"
 echo
 echo "Next steps:"
 echo "1. Restart KWin:"
-echo "   For X11: kwin_x11 --replace &"
+echo "   For X11: Run 'kwin_x11 --replace' in a terminal"
 echo "   For Wayland: Log out and log back in"
 echo
 echo "2. Enable the effect:"
