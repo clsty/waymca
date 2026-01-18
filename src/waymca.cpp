@@ -17,7 +17,6 @@
  */
 
 #include "waymca.h"
-#include "waymca.h.moc"
 #include "waymcaconfig.h"
 
 #include <QFile>
@@ -92,10 +91,22 @@ void WayMCAEffect::loadShader()
     QByteArray fragmentSource = fragmentFile.readAll();
     fragmentFile.close();
 
-    // Create shader
+    // Create shader with default vertex shader
+    const QString vertexShader = QStringLiteral(R"(
+#version 140
+uniform mat4 modelViewProjectionMatrix;
+in vec4 vertex;
+in vec2 texCoord;
+out vec2 texcoord0;
+
+void main() {
+    gl_Position = modelViewProjectionMatrix * vertex;
+    texcoord0 = texCoord;
+}
+)");
+
     m_shader = std::make_unique<GLShader>(GLShader::ExplicitLinking);
-    m_shader->setVertexShader(ShaderManager::instance()->generateShaderFromFile(
-        ShaderTrait::MapTexture, QString(), QStringLiteral("")));
+    m_shader->setVertexShader(vertexShader.toUtf8());
     m_shader->setFragmentShader(fragmentSource);
 
     if (!m_shader->link()) {
@@ -170,32 +181,35 @@ void WayMCAEffect::paintScreen(const RenderTarget &renderTarget, const RenderVie
     m_offscreenTexture->bind();
 
     // Render a fullscreen quad
-    QRectF screenRect(0, 0, screenSize.width(), screenSize.height());
+    const QRectF screenRect(0, 0, screenSize.width(), screenSize.height());
     GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
     vbo->reset();
     
-    const QRectF localRect = renderTarget.transform().map(screenRect, Qt::TransformationMode::FastTransformation).boundingRect();
-    const QRectF deviceRect = viewport.transform().map(localRect, Qt::TransformationMode::FastTransformation).boundingRect();
+    // Transform coordinates through viewport
+    const auto mvp = viewport.projectionMatrix();
+    m_shader->setUniform(GLShader::Mat4Uniform::ModelViewProjectionMatrix, mvp);
     
-    QVector<float> verts;
+    // Simple normalized device coordinates for a fullscreen quad
+    QVector<float> vertices;
     QVector<float> texCoords;
     
-    verts << deviceRect.left() << deviceRect.top();
-    verts << deviceRect.left() << deviceRect.bottom();
-    verts << deviceRect.right() << deviceRect.bottom();
-    verts << deviceRect.right() << deviceRect.bottom();
-    verts << deviceRect.right() << deviceRect.top();
-    verts << deviceRect.left() << deviceRect.top();
+    // Two triangles forming a quad
+    vertices << -1.0f << -1.0f;  // bottom-left
+    vertices << -1.0f <<  1.0f;  // top-left
+    vertices <<  1.0f <<  1.0f;  // top-right
+    vertices <<  1.0f <<  1.0f;  // top-right
+    vertices <<  1.0f << -1.0f;  // bottom-right
+    vertices << -1.0f << -1.0f;  // bottom-left
     
-    texCoords << 0.0f << 0.0f;
-    texCoords << 0.0f << 1.0f;
-    texCoords << 1.0f << 1.0f;
-    texCoords << 1.0f << 1.0f;
-    texCoords << 1.0f << 0.0f;
-    texCoords << 0.0f << 0.0f;
+    texCoords << 0.0f << 1.0f;  // bottom-left (flipped)
+    texCoords << 0.0f << 0.0f;  // top-left
+    texCoords << 1.0f << 0.0f;  // top-right
+    texCoords << 1.0f << 0.0f;  // top-right
+    texCoords << 1.0f << 1.0f;  // bottom-right (flipped)
+    texCoords << 0.0f << 1.0f;  // bottom-left (flipped)
     
-    vbo->setVertices(verts);
-    vbo->setTexCoords(2, texCoords);
+    vbo->setVertices(vertices);
+    vbo->setTexCoords(texCoords);
     vbo->render(GL_TRIANGLES);
 
     m_offscreenTexture->unbind();
