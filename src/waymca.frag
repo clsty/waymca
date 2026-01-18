@@ -42,7 +42,6 @@ vec4 gaussianBlur(int radius) {
     // For simplicity, use a 2-pass approximation with 1D Gaussian
     // Horizontal pass
     vec4 horizontalBlur = vec4(0.0);
-    int kernelSize = min(radius * 2 + 1, 11); // Cap at 11 for performance
     
     if (radius <= 3) {
         // Use smaller kernel for radius <= 3
@@ -61,8 +60,8 @@ vec4 gaussianBlur(int radius) {
         }
     }
     
-    // For full 2D blur, we would need to do a vertical pass here
-    // For performance, we'll do a simple approximation by averaging with vertical
+    // For performance, approximate separable 2D Gaussian as average of horizontal and vertical 1D passes
+    // This is not a true 2-pass separable blur but provides reasonable quality with better performance
     vec4 verticalBlur = vec4(0.0);
     
     if (radius <= 3) {

@@ -159,9 +159,11 @@ void WayMCAEffect::paintScreen(const RenderTarget &renderTarget, const RenderVie
     }
 
     // Render scene to offscreen texture
-    GLFramebuffer::pushFramebuffer(m_offscreenTarget.get());
-    effects->paintScreen(renderTarget, viewport, mask, region, screen);
-    GLFramebuffer::popFramebuffer();
+    {
+        GLFramebuffer::pushFramebuffer(m_offscreenTarget.get());
+        effects->paintScreen(renderTarget, viewport, mask, region, screen);
+        GLFramebuffer::popFramebuffer();
+    }
 
     // Apply chromatic aberration shader
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -180,14 +182,9 @@ void WayMCAEffect::paintScreen(const RenderTarget &renderTarget, const RenderVie
     // Bind the offscreen texture
     m_offscreenTexture->bind();
 
-    // Render a fullscreen quad
-    const QRectF screenRect(0, 0, screenSize.width(), screenSize.height());
+    // Render a fullscreen quad with normalized device coordinates
     GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
     vbo->reset();
-    
-    // Transform coordinates through viewport
-    const auto mvp = viewport.projectionMatrix();
-    m_shader->setUniform(GLShader::Mat4Uniform::ModelViewProjectionMatrix, mvp);
     
     // Simple normalized device coordinates for a fullscreen quad
     QVector<float> vertices;
