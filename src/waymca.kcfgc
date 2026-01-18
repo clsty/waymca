@@ -1,0 +1,4 @@
+File=waymca.kcfg
+ClassName=WayMCAConfig
+Singleton=true
+Mutators=true

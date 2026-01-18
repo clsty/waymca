@@ -45,7 +45,7 @@ set(waymca_SOURCES
     src/waymca.cpp
 )
 
-kconfig_add_kcfg_files(waymca_SOURCES src/waymca.kcfg)
+kconfig_add_kcfg_files(waymca_SOURCES src/waymca.kcfgc)
 
 add_library(waymca MODULE ${waymca_SOURCES})
 
@@ -70,7 +70,7 @@ set(waymca_config_SOURCES
 )
 
 ki18n_wrap_ui(waymca_config_SOURCES src/waymca_config.ui)
-kconfig_add_kcfg_files(waymca_config_SOURCES src/waymca.kcfg)
+kconfig_add_kcfg_files(waymca_config_SOURCES src/waymca.kcfgc)
 
 add_library(waymca_config MODULE ${waymca_config_SOURCES})
 
