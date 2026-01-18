@@ -158,12 +158,15 @@ void WayMCAEffect::paintScreen(const RenderTarget &renderTarget, const RenderVie
         }
     }
 
-    // Render scene to offscreen texture
-    {
-        GLFramebuffer::pushFramebuffer(m_offscreenTarget.get());
+    // Render scene to offscreen texture with proper exception safety
+    GLFramebuffer::pushFramebuffer(m_offscreenTarget.get());
+    try {
         effects->paintScreen(renderTarget, viewport, mask, region, screen);
+    } catch (...) {
         GLFramebuffer::popFramebuffer();
+        throw;
     }
+    GLFramebuffer::popFramebuffer();
 
     // Apply chromatic aberration shader
     glClearColor(0.0, 0.0, 0.0, 0.0);

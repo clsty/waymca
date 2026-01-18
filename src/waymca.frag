@@ -60,8 +60,9 @@ vec4 gaussianBlur(int radius) {
         }
     }
     
-    // For performance, approximate separable 2D Gaussian as average of horizontal and vertical 1D passes
-    // This is not a true 2-pass separable blur but provides reasonable quality with better performance
+    // Note: This is an approximation that averages horizontal and vertical 1D Gaussian passes.
+    // It does NOT produce mathematically correct 2D Gaussian blur (which requires sequential passes
+    // with intermediate storage), but provides reasonable visual quality with better performance.
     vec4 verticalBlur = vec4(0.0);
     
     if (radius <= 3) {
