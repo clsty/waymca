@@ -2,19 +2,21 @@
 
 ## Prerequisites
 
+### Arch Linux (Recommended)
+
+```bash
+sudo pacman -S cmake extra-cmake-modules kwin qt6-base
+```
+
 ### Debian 13 (Trixie) or later
+
+**Note:** Debian packages may not be recent enough for Plasma 6. Arch Linux is recommended.
 
 ```bash
 sudo apt update
 sudo apt install cmake build-essential extra-cmake-modules \
     libkf6config-dev libkf6configwidgets-dev libkf6coreaddons-dev \
     libkf6i18n-dev kwin-dev qtbase6-dev libepoxy-dev
-```
-
-### Arch Linux
-
-```bash
-sudo pacman -S cmake extra-cmake-modules kwin qt6-base
 ```
 
 ### Fedora

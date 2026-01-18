@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build script for WayMCA KWin Effect
+# Build script for WayMCA KWin Effect (Arch Linux)
 
 set -e
 
@@ -9,8 +9,15 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}WayMCA Build Script${NC}"
-echo "===================="
+echo -e "${GREEN}WayMCA Build Script (Arch Linux)${NC}"
+echo "===================================="
+
+# Check if running on Arch Linux
+if [ -f /etc/arch-release ]; then
+    echo -e "${GREEN}✓${NC} Running on Arch Linux"
+else
+    echo -e "${YELLOW}⚠${NC} This script is optimized for Arch Linux"
+fi
 
 # Check for required commands
 echo -e "\n${YELLOW}Checking dependencies...${NC}"
@@ -19,6 +26,25 @@ command -v make >/dev/null 2>&1 || { echo -e "${RED}make is required but not ins
 
 echo -e "${GREEN}✓${NC} cmake found"
 echo -e "${GREEN}✓${NC} make found"
+
+# Check for Arch Linux specific packages
+echo -e "\n${YELLOW}Checking Arch Linux packages...${NC}"
+MISSING_PACKAGES=()
+
+for pkg in extra-cmake-modules kwin qt6-base; do
+    if ! pacman -Qi "$pkg" &> /dev/null; then
+        MISSING_PACKAGES+=("$pkg")
+    fi
+done
+
+if [ ${#MISSING_PACKAGES[@]} -gt 0 ]; then
+    echo -e "${RED}✗${NC} Missing required packages: ${MISSING_PACKAGES[*]}"
+    echo -e "\n${YELLOW}Install with:${NC}"
+    echo "  sudo pacman -S ${MISSING_PACKAGES[*]}"
+    exit 1
+else
+    echo -e "${GREEN}✓${NC} All required Arch packages are installed"
+fi
 
 # Create build directory
 echo -e "\n${YELLOW}Creating build directory...${NC}"
@@ -32,14 +58,7 @@ if cmake ..; then
 else
     echo -e "${RED}✗${NC} CMake configuration failed"
     echo -e "${YELLOW}Make sure you have installed all dependencies:${NC}"
-    echo "  - extra-cmake-modules"
-    echo "  - libkf6config-dev"
-    echo "  - libkf6configwidgets-dev"
-    echo "  - libkf6coreaddons-dev"
-    echo "  - libkf6i18n-dev"
-    echo "  - kwin-dev"
-    echo "  - qtbase6-dev"
-    echo "  - libepoxy-dev"
+    echo "  sudo pacman -S cmake extra-cmake-modules kwin qt6-base"
     exit 1
 fi
 

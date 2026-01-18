@@ -1,5 +1,7 @@
 # WayMCA - Myopic Chromatic Aberration Effect for KDE Plasma 6
 
+[![Build WayMCA](https://github.com/clsty/waymca/actions/workflows/build.yml/badge.svg)](https://github.com/clsty/waymca/actions/workflows/build.yml)
+
 WayMCA is a KWin effect plugin for KDE Plasma 6 (Wayland) that simulates longitudinal chromatic aberration for myopia prevention/control.
 
 ## What It Does
@@ -25,7 +27,15 @@ See the `reference/` directory for the scientific paper that inspired this effec
 - OpenGL/epoxy
 - CMake 3.16+
 
+### On Arch Linux (Recommended):
+
+```bash
+sudo pacman -S cmake extra-cmake-modules kwin qt6-base
+```
+
 ### On Debian 13 (Trixie) or later:
+
+**Note:** Debian packages may not be recent enough. Arch Linux is recommended.
 
 ```bash
 sudo apt install cmake build-essential extra-cmake-modules \
@@ -35,6 +45,16 @@ sudo apt install cmake build-essential extra-cmake-modules \
 
 ## Building
 
+### Quick Build (Arch Linux)
+
+Use the provided build script:
+
+```bash
+./build.sh
+```
+
+### Manual Build
+
 ```bash
 mkdir build
 cd build
@@ -42,6 +62,10 @@ cmake ..
 make
 sudo make install
 ```
+
+### Automated Builds
+
+Pre-built binaries are available from GitHub Actions artifacts. Check the [Actions tab](https://github.com/clsty/waymca/actions) for the latest builds.
 
 ## Usage
 
