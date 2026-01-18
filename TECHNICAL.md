@@ -11,7 +11,8 @@ waymca/
 ├── metadata.json              # KPackage metadata
 ├── contents/
 │   ├── config/
-│   │   └── main.xml          # Configuration schema (KConfigXT)
+│   │   ├── main.xml          # Configuration schema (KConfigXT)
+│   │   └── waymca_config.desktop  # Configuration module entry
 │   ├── ui/
 │   │   ├── main.qml          # Main effect logic
 │   │   └── config.qml        # Configuration UI
@@ -38,6 +39,16 @@ KConfigXT schema defining three configuration options:
 - **GreenBlurRadius** (Int, 0-20, default: 3)
 - **BlueBlurRadius** (Int, 0-20, default: 8)
 - **UseGaussianBlur** (Bool, default: true)
+
+### contents/config/waymca_config.desktop
+
+Desktop entry file that registers the configuration module with KWin:
+- **Type**: Service
+- **X-KDE-ServiceTypes**: KCModule
+- **X-KDE-Library**: kcm_kwin_effects
+- **X-KDE-ParentComponents**: waymca
+
+This file is essential for the "Configure" button to appear in System Settings → Desktop Effects. Without it, the effect will be listed but won't show configuration options.
 
 ### contents/ui/main.qml
 
