@@ -15,6 +15,7 @@
         "Version": "1.0.0",
         "Website": "https://github.com/clsty/waymca"
     },
+    "X-KDE-ConfigModule": "kwin_effect_waymca_config",
     "X-KWin-Effect-PluginInfo": {
         "PluginId": "waymca"
     }
