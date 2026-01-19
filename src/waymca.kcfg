@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+                          http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile arg="true"/>
+    <group name="Effect-waymca">
+        <entry name="GreenBlurRadius" type="Int">
+            <default>3</default>
+            <min>0</min>
+            <max>20</max>
+        </entry>
+        <entry name="BlueBlurRadius" type="Int">
+            <default>8</default>
+            <min>0</min>
+            <max>20</max>
+        </entry>
+        <entry name="UseGaussianBlur" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="FullScreenBlur" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="FullScreenBlurRadius" type="Int">
+            <default>10</default>
+            <min>0</min>
+            <max>50</max>
+        </entry>
+    </group>
+</kcfg>
