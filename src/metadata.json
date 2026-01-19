@@ -8,7 +8,6 @@
         "Category": "Appearance",
         "Description": "Simulates myopic chromatic aberration for myopia control",
         "EnabledByDefault": false,
-        "Id": "waymca",
         "License": "GPL-3.0",
         "Name": "WayMCA",
         "Version": "1.0.0",

@@ -9,14 +9,10 @@
         "Category": "Appearance",
         "Description": "Simulates myopic chromatic aberration for myopia control",
         "EnabledByDefault": false,
-        "Id": "waymca",
         "License": "GPL-3.0",
         "Name": "WayMCA",
         "Version": "1.0.0",
         "Website": "https://github.com/clsty/waymca"
     },
-    "X-KDE-ConfigModule": "kwin_effect_waymca_config",
-    "X-KWin-Effect-PluginInfo": {
-        "PluginId": "waymca"
-    }
+    "X-KDE-ConfigModule": "kwin_effect_waymca_config"
 }

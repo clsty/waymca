@@ -10,6 +10,7 @@
 
 #include <QSpinBox>
 #include <QCheckBox>
+#include <QSlider>
 
 #include "ui_waymca_config.h"
 
@@ -28,6 +29,9 @@ public:
     void load() override;
     void defaults() override;
 
+private Q_SLOTS:
+    void onValueChanged();
+
 private:
     Ui::WayMCAConfig ui;
     KSharedConfig::Ptr m_config;
@@ -39,11 +43,28 @@ WaymcaEffectConfig::WaymcaEffectConfig(QObject *parent, const KPluginMetaData &d
     ui.setupUi(widget());
     m_config = KSharedConfig::openConfig(QStringLiteral("kwinrc"));
     
+    // Connect signals to track changes
+    connect(ui.kcfg_GreenBlurRadius, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &WaymcaEffectConfig::onValueChanged);
+    connect(ui.kcfg_BlueBlurRadius, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &WaymcaEffectConfig::onValueChanged);
+    connect(ui.kcfg_UseGaussianBlur, &QCheckBox::stateChanged,
+            this, &WaymcaEffectConfig::onValueChanged);
+    connect(ui.kcfg_FullScreenBlur, &QCheckBox::stateChanged,
+            this, &WaymcaEffectConfig::onValueChanged);
+    connect(ui.kcfg_FullScreenBlurRadius, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &WaymcaEffectConfig::onValueChanged);
+    
     load();
 }
 
 WaymcaEffectConfig::~WaymcaEffectConfig()
 {
+}
+
+void WaymcaEffectConfig::onValueChanged()
+{
+    setNeedsSave(true);
 }
 
 void WaymcaEffectConfig::save()
@@ -57,6 +78,7 @@ void WaymcaEffectConfig::save()
     conf.sync();
     
     KCModule::save();
+    setNeedsSave(false);
 }
 
 void WaymcaEffectConfig::load()
@@ -69,6 +91,7 @@ void WaymcaEffectConfig::load()
     ui.kcfg_FullScreenBlurRadius->setValue(conf.readEntry("FullScreenBlurRadius", 10));
     
     KCModule::load();
+    setNeedsSave(false);
 }
 
 void WaymcaEffectConfig::defaults()
@@ -79,7 +102,7 @@ void WaymcaEffectConfig::defaults()
     ui.kcfg_FullScreenBlur->setChecked(false);
     ui.kcfg_FullScreenBlurRadius->setValue(10);
     
-    markAsChanged();
+    setNeedsSave(true);
 }
 
 K_PLUGIN_CLASS(WaymcaEffectConfig)
