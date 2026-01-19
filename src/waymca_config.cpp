@@ -8,9 +8,8 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 
-#include <QSpinBox>
-#include <QCheckBox>
 #include <QSlider>
+#include <QCheckBox>
 
 #include "ui_waymca_config.h"
 
@@ -43,16 +42,16 @@ WaymcaEffectConfig::WaymcaEffectConfig(QObject *parent, const KPluginMetaData &d
     ui.setupUi(widget());
     m_config = KSharedConfig::openConfig(QStringLiteral("kwinrc"));
     
-    // Connect signals to track changes
-    connect(ui.kcfg_GreenBlurRadius, QOverload<int>::of(&QSpinBox::valueChanged),
+    // Connect signals to track changes - using QSlider for sliders, QCheckBox for checkboxes
+    connect(ui.kcfg_GreenBlurRadius, &QSlider::valueChanged,
             this, &WaymcaEffectConfig::onValueChanged);
-    connect(ui.kcfg_BlueBlurRadius, QOverload<int>::of(&QSpinBox::valueChanged),
+    connect(ui.kcfg_BlueBlurRadius, &QSlider::valueChanged,
             this, &WaymcaEffectConfig::onValueChanged);
     connect(ui.kcfg_UseGaussianBlur, &QCheckBox::stateChanged,
             this, &WaymcaEffectConfig::onValueChanged);
     connect(ui.kcfg_FullScreenBlur, &QCheckBox::stateChanged,
             this, &WaymcaEffectConfig::onValueChanged);
-    connect(ui.kcfg_FullScreenBlurRadius, QOverload<int>::of(&QSpinBox::valueChanged),
+    connect(ui.kcfg_FullScreenBlurRadius, &QSlider::valueChanged,
             this, &WaymcaEffectConfig::onValueChanged);
     
     load();
