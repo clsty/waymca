@@ -35,6 +35,18 @@ WaymcaEffect::WaymcaEffect()
     KGlobalAccel::self()->setDefaultShortcut(toggleAction, QList<QKeySequence>());
     KGlobalAccel::self()->setShortcut(toggleAction, QList<QKeySequence>());
     connect(toggleAction, &QAction::triggered, this, &WaymcaEffect::toggleEffect);
+    
+    // Connect window signals
+    connect(effects, &EffectsHandler::windowAdded, this, &WaymcaEffect::slotWindowAdded);
+    connect(effects, &EffectsHandler::windowDeleted, this, &WaymcaEffect::slotWindowDeleted);
+    
+    // Apply effect to all existing windows
+    if (m_valid) {
+        const auto windows = effects->stackingOrder();
+        for (EffectWindow *window : windows) {
+            applyEffect(window);
+        }
+    }
 }
 
 WaymcaEffect::~WaymcaEffect() = default;
@@ -62,7 +74,27 @@ void WaymcaEffect::reconfigure(ReconfigureFlags flags)
     m_fullScreenBlurMode = conf.readEntry("FullScreenBlur", false);
     m_fullScreenBlurRadius = conf.readEntry("FullScreenBlurRadius", 10);
 
+    // If we had a shader before, we need to reload and reapply
+    const bool hadValidShader = m_valid;
+    
+    // Remove effect from all windows before reloading shader
+    if (hadValidShader) {
+        for (EffectWindow *w : m_windows) {
+            unredirect(w);
+        }
+        m_windows.clear();
+    }
+    
     loadShader();
+    
+    // Reapply effect to all windows
+    if (m_valid) {
+        const auto windows = effects->stackingOrder();
+        for (EffectWindow *window : windows) {
+            applyEffect(window);
+        }
+        effects->addRepaintFull();
+    }
 }
 
 void WaymcaEffect::loadShader()
@@ -103,6 +135,7 @@ void WaymcaEffect::loadShader()
     }
 
     m_valid = true;
+    m_inited = true;
     updateShaderUniforms();
 }
 
@@ -121,39 +154,55 @@ void WaymcaEffect::updateShaderUniforms()
     m_shader->setUniform("fullScreenBlurRadius", static_cast<float>(m_fullScreenBlurRadius));
 }
 
-void WaymcaEffect::prePaintScreen(ScreenPrePaintData &data, std::chrono::milliseconds presentTime)
+void WaymcaEffect::applyEffect(EffectWindow *window)
+{
+    if (!m_valid || !m_shader) {
+        return;
+    }
+    
+    if (m_windows.contains(window)) {
+        return;
+    }
+    
+    redirect(window);
+    setShader(window, m_shader.get());
+    m_windows.insert(window);
+}
+
+void WaymcaEffect::removeEffect(EffectWindow *window)
+{
+    if (auto it = m_windows.find(window); it != m_windows.end()) {
+        unredirect(window);
+        m_windows.erase(it);
+    }
+}
+
+void WaymcaEffect::slotWindowAdded(KWin::EffectWindow *w)
 {
     if (m_valid) {
-        const auto windows = effects->stackingOrder();
-        for (EffectWindow *window : windows) {
-            if (window->isOnCurrentDesktop() && !window->isMinimized()) {
-                redirect(window);
-            }
-        }
+        applyEffect(w);
     }
+}
 
-    effects->prePaintScreen(data, presentTime);
+void WaymcaEffect::slotWindowDeleted(KWin::EffectWindow *w)
+{
+    if (auto it = m_windows.find(w); it != m_windows.end()) {
+        m_windows.erase(it);
+    }
 }
 
 void WaymcaEffect::drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport,
                               EffectWindow *window, int mask, const QRegion &region,
                               WindowPaintData &data)
 {
-    if (m_valid && m_shader) {
-        setShader(window, m_shader.get());
-        updateShaderUniforms();
-    }
-
-    effects->drawWindow(renderTarget, viewport, window, mask, region, data);
-
-    if (m_valid) {
-        unredirect(window);
-    }
+    // The shader is already bound via setShader() in applyEffect()
+    // Just call the base class implementation which will apply the shader
+    OffscreenEffect::drawWindow(renderTarget, viewport, window, mask, region, data);
 }
 
 bool WaymcaEffect::isActive() const
 {
-    return m_valid && effects->isOpenGLCompositing();
+    return m_valid && !m_windows.empty();
 }
 
 int WaymcaEffect::requestedEffectChainPosition() const
@@ -163,11 +212,22 @@ int WaymcaEffect::requestedEffectChainPosition() const
 
 void WaymcaEffect::toggleEffect()
 {
-    // Toggle the effect on/off
     if (m_valid) {
+        // Turn off the effect
+        for (EffectWindow *w : m_windows) {
+            unredirect(w);
+        }
+        m_windows.clear();
         m_valid = false;
     } else {
+        // Turn on the effect
         loadShader();
+        if (m_valid) {
+            const auto windows = effects->stackingOrder();
+            for (EffectWindow *window : windows) {
+                applyEffect(window);
+            }
+        }
     }
     effects->addRepaintFull();
 }
