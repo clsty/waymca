@@ -47,9 +47,9 @@ WaymcaEffectConfig::WaymcaEffectConfig(QObject *parent, const KPluginMetaData &d
             this, &WaymcaEffectConfig::onValueChanged);
     connect(ui.kcfg_BlueBlurRadius, &QSlider::valueChanged,
             this, &WaymcaEffectConfig::onValueChanged);
-    connect(ui.kcfg_UseGaussianBlur, &QCheckBox::stateChanged,
+    connect(ui.kcfg_UseGaussianBlur, &QCheckBox::checkStateChanged,
             this, &WaymcaEffectConfig::onValueChanged);
-    connect(ui.kcfg_FullScreenBlur, &QCheckBox::stateChanged,
+    connect(ui.kcfg_FullScreenBlur, &QCheckBox::checkStateChanged,
             this, &WaymcaEffectConfig::onValueChanged);
     connect(ui.kcfg_FullScreenBlurRadius, &QSlider::valueChanged,
             this, &WaymcaEffectConfig::onValueChanged);
