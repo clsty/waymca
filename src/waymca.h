@@ -56,7 +56,6 @@ private:
     int m_fullScreenBlurRadius = 10;
     
     bool m_valid = false;
-    bool m_inited = false;
 };
 
 } // namespace KWin

@@ -135,7 +135,6 @@ void WaymcaEffect::loadShader()
     }
 
     m_valid = true;
-    m_inited = true;
     updateShaderUniforms();
 }
 
