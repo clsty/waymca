@@ -1,4 +1,6 @@
 #!/bin/bash
+# Under Debian13, dependencies:
+sudo apt install cmake g++ extra-cmake-modules qt6-tools-dev kwin-dev libkf6crash-dev libkf6globalaccel-dev libkf6kio-dev libkf6service-dev libkf6notifications-dev libkf6kcmutils-dev libkdecorations3-dev libkf6config-dev libkf6configwidgets-dev libkf6coreaddons-dev libkf6i18n-dev libepoxy-dev
 set -e
 
 echo "=== WayMCA C++ Build Script ==="
