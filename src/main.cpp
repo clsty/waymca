@@ -15,5 +15,3 @@ KWIN_EFFECT_FACTORY_SUPPORTED_ENABLED(WaymcaEffect,
                                       return WaymcaEffect::enabledByDefault();)
 
 } // namespace KWin
-
-#include "main.moc"
