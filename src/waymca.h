@@ -6,7 +6,6 @@
 #pragma once
 
 #include <effect/offscreeneffect.h>
-#include <unordered_set>
 
 namespace KWin
 {
@@ -22,6 +21,7 @@ public:
     ~WaymcaEffect() override;
 
     void reconfigure(ReconfigureFlags flags) override;
+    void prePaintScreen(ScreenPrePaintData &data, std::chrono::milliseconds presentTime) override;
     void drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport,
                     EffectWindow *window, int mask, const QRegion &region,
                     WindowPaintData &data) override;
@@ -35,18 +35,11 @@ public:
 public Q_SLOTS:
     void toggleEffect();
 
-private Q_SLOTS:
-    void slotWindowAdded(KWin::EffectWindow *w);
-    void slotWindowDeleted(KWin::EffectWindow *w);
-
 private:
     void loadShader();
     void updateShaderUniforms();
-    void applyEffect(EffectWindow *window);
-    void removeEffect(EffectWindow *window);
     
     std::unique_ptr<GLShader> m_shader;
-    std::unordered_set<EffectWindow *> m_windows;
     
     // Configuration values
     int m_greenBlurRadius = 3;
@@ -56,6 +49,7 @@ private:
     int m_fullScreenBlurRadius = 10;
     
     bool m_valid = false;
+    bool m_inited = false;
 };
 
 } // namespace KWin
