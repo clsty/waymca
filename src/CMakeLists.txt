@@ -23,6 +23,7 @@ set(WAYMCA_CONFIG_TARGET kwin_effect_waymca_config)
 set(waymca_config_SOURCES waymca_config.cpp)
 ki18n_wrap_ui(waymca_config_SOURCES waymca_config.ui)
 kconfig_add_kcfg_files(waymca_config_SOURCES waymcaconfig.kcfgc)
+qt_add_dbus_interface(waymca_config_SOURCES ${KWIN_EFFECTS_INTERFACE} kwineffects_interface)
 
 add_library(${WAYMCA_CONFIG_TARGET} MODULE ${waymca_config_SOURCES})
 
