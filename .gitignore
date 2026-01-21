@@ -23,3 +23,6 @@ build/
 # Package files (if created)
 *.tar.gz
 *.zip
+
+# CodeQL analysis
+_codeql_detected_source_root
