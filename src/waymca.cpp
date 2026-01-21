@@ -5,11 +5,15 @@
 
 #include "waymca.h"
 
+#include <core/rendertarget.h>
 #include <core/renderviewport.h>
 #include <effect/effecthandler.h>
-#include <effect/effectwindow.h>
 #include <opengl/glshader.h>
 #include <opengl/glshadermanager.h>
+#include <opengl/gltexture.h>
+#include <opengl/glframebuffer.h>
+#include <opengl/glvertexbuffer.h>
+#include <opengl/glutils.h>
 
 #include <QAction>
 #include <QFile>
@@ -24,7 +28,7 @@ namespace KWin
 {
 
 WaymcaEffect::WaymcaEffect()
-    : OffscreenEffect()
+    : Effect()
 {
     reconfigure(ReconfigureAll);
     
@@ -46,7 +50,7 @@ bool WaymcaEffect::supported()
 
 bool WaymcaEffect::enabledByDefault()
 {
-    return supported();
+    return false;
 }
 
 void WaymcaEffect::reconfigure(ReconfigureFlags flags)
@@ -63,6 +67,9 @@ void WaymcaEffect::reconfigure(ReconfigureFlags flags)
     m_fullScreenBlurRadius = conf.readEntry("FullScreenBlurRadius", 10);
 
     loadShader();
+    
+    // Request repaint to apply new settings
+    effects->addRepaintFull();
 }
 
 void WaymcaEffect::loadShader()
@@ -103,7 +110,7 @@ void WaymcaEffect::loadShader()
     }
 
     m_valid = true;
-    updateShaderUniforms();
+    qDebug() << "WayMCA: Shader loaded successfully";
 }
 
 void WaymcaEffect::updateShaderUniforms()
@@ -121,34 +128,122 @@ void WaymcaEffect::updateShaderUniforms()
     m_shader->setUniform("fullScreenBlurRadius", static_cast<float>(m_fullScreenBlurRadius));
 }
 
+bool WaymcaEffect::ensureResources()
+{
+    if (!m_valid) {
+        return false;
+    }
+    
+    return true;
+}
+
 void WaymcaEffect::prePaintScreen(ScreenPrePaintData &data, std::chrono::milliseconds presentTime)
 {
+    // Set flag to capture the screen
     if (m_valid) {
-        const auto windows = effects->stackingOrder();
-        for (EffectWindow *window : windows) {
-            if (window->isOnCurrentDesktop() && !window->isMinimized()) {
-                redirect(window);
-            }
-        }
+        m_captureInProgress = true;
     }
-
+    
     effects->prePaintScreen(data, presentTime);
 }
 
-void WaymcaEffect::drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport,
-                              EffectWindow *window, int mask, const QRegion &region,
-                              WindowPaintData &data)
+void WaymcaEffect::paintScreen(const RenderTarget &renderTarget, const RenderViewport &viewport, int mask, const QRegion &region, Output *screen)
 {
-    if (m_valid && m_shader) {
-        setShader(window, m_shader.get());
-        updateShaderUniforms();
+    if (!m_valid || !m_shader) {
+        // Effect not ready, just render normally
+        effects->paintScreen(renderTarget, viewport, mask, region, screen);
+        m_captureInProgress = false;
+        return;
     }
 
-    effects->drawWindow(renderTarget, viewport, window, mask, region, data);
-
-    if (m_valid) {
-        unredirect(window);
+    // Render everything normally first, but to an offscreen texture
+    const QRect screenRect = viewport.renderRect().toRect();
+    const QSize screenSize = screenRect.size();
+    
+    // Create or update the FBO and texture if needed
+    if (!m_fbo || !m_texture || m_texture->size() != screenSize) {
+        m_texture = std::make_unique<GLTexture>(GL_RGBA8, screenSize);
+        m_texture->setFilter(GL_LINEAR);
+        m_texture->setWrapMode(GL_CLAMP_TO_EDGE);
+        m_fbo = std::make_unique<GLFramebuffer>(m_texture.get());
+        
+        if (!m_fbo->valid()) {
+            qWarning() << "WayMCA: Failed to create FBO";
+            m_valid = false;
+            effects->paintScreen(renderTarget, viewport, mask, region, screen);
+            m_captureInProgress = false;
+            return;
+        }
     }
+    
+    // Render the screen to our offscreen texture
+    GLFramebuffer::pushFramebuffer(m_fbo.get());
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    effects->paintScreen(renderTarget, viewport, mask, region, screen);
+    
+    GLFramebuffer::popFramebuffer();
+    
+    // Now render the offscreen texture to the actual screen with our shader applied
+    ShaderBinder shaderBinder(m_shader.get());
+    
+    // Update shader uniforms
+    updateShaderUniforms();
+    
+    // Set up the transformation matrix
+    QMatrix4x4 mvp = viewport.projectionMatrix();
+    mvp.translate(screenRect.x(), screenRect.y());
+    m_shader->setUniform(GLShader::Mat4Uniform::ModelViewProjectionMatrix, mvp);
+    m_shader->setUniform("sampler", 0);
+    
+    // Bind our captured texture
+    m_texture->bind();
+    
+    // Render a full-screen quad
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Create vertex data for a full-screen quad
+    const QRectF target = QRectF(0, 0, screenSize.width(), screenSize.height());
+    const QRectF source = QRectF(0, 0, 1, 1);  // Normalized texture coordinates
+    
+    GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
+    vbo->reset();
+    vbo->setAttribLayout(std::span(GLVertexBuffer::GLVertex2DLayout), sizeof(GLVertex2D));
+    
+    GLVertex2D *verts = (GLVertex2D*)vbo->map(6 * sizeof(GLVertex2D));
+    if (verts) {
+        // First triangle
+        verts[0].position = QVector2D(target.left(), target.top());
+        verts[0].texcoord = QVector2D(source.left(), source.top());
+        verts[1].position = QVector2D(target.right(), target.top());
+        verts[1].texcoord = QVector2D(source.right(), source.top());
+        verts[2].position = QVector2D(target.left(), target.bottom());
+        verts[2].texcoord = QVector2D(source.left(), source.bottom());
+        
+        // Second triangle
+        verts[3].position = QVector2D(target.right(), target.top());
+        verts[3].texcoord = QVector2D(source.right(), source.top());
+        verts[4].position = QVector2D(target.right(), target.bottom());
+        verts[4].texcoord = QVector2D(source.right(), source.bottom());
+        verts[5].position = QVector2D(target.left(), target.bottom());
+        verts[5].texcoord = QVector2D(source.left(), source.bottom());
+        
+        vbo->unmap();
+        vbo->render(GL_TRIANGLES);
+    }
+    
+    m_texture->unbind();
+    glDisable(GL_BLEND);
+    
+    m_captureInProgress = false;
+}
+
+void WaymcaEffect::postPaintScreen()
+{
+    m_captureInProgress = false;
+    effects->postPaintScreen();
 }
 
 bool WaymcaEffect::isActive() const
@@ -158,7 +253,7 @@ bool WaymcaEffect::isActive() const
 
 int WaymcaEffect::requestedEffectChainPosition() const
 {
-    return 98; // Just before the final composition
+    return 99; // Very late in the chain, after composition
 }
 
 void WaymcaEffect::toggleEffect()

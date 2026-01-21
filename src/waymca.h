@@ -5,14 +5,17 @@
 
 #pragma once
 
-#include <effect/offscreeneffect.h>
+#include <effect/effect.h>
 
 namespace KWin
 {
 
 class GLShader;
+class GLTexture;
+class GLFramebuffer;
+class GLVertexBuffer;
 
-class WaymcaEffect : public OffscreenEffect
+class WaymcaEffect : public Effect
 {
     Q_OBJECT
 
@@ -22,9 +25,8 @@ public:
 
     void reconfigure(ReconfigureFlags flags) override;
     void prePaintScreen(ScreenPrePaintData &data, std::chrono::milliseconds presentTime) override;
-    void drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport,
-                    EffectWindow *window, int mask, const QRegion &region,
-                    WindowPaintData &data) override;
+    void paintScreen(const RenderTarget &renderTarget, const RenderViewport &viewport, int mask, const QRegion &region, Output *screen) override;
+    void postPaintScreen() override;
 
     bool isActive() const override;
     int requestedEffectChainPosition() const override;
@@ -38,8 +40,11 @@ public Q_SLOTS:
 private:
     void loadShader();
     void updateShaderUniforms();
+    bool ensureResources();
     
     std::unique_ptr<GLShader> m_shader;
+    std::unique_ptr<GLTexture> m_texture;
+    std::unique_ptr<GLFramebuffer> m_fbo;
     
     // Configuration values
     int m_greenBlurRadius = 3;
@@ -50,6 +55,9 @@ private:
     
     bool m_valid = false;
     bool m_inited = false;
+    
+    // Screen capture
+    bool m_captureInProgress = false;
 };
 
 } // namespace KWin
