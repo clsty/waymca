@@ -128,15 +128,6 @@ void WaymcaEffect::updateShaderUniforms()
     m_shader->setUniform("fullScreenBlurRadius", static_cast<float>(m_fullScreenBlurRadius));
 }
 
-bool WaymcaEffect::ensureResources()
-{
-    if (!m_valid) {
-        return false;
-    }
-    
-    return true;
-}
-
 void WaymcaEffect::prePaintScreen(ScreenPrePaintData &data, std::chrono::milliseconds presentTime)
 {
     // Set flag to capture the screen
@@ -197,44 +188,13 @@ void WaymcaEffect::paintScreen(const RenderTarget &renderTarget, const RenderVie
     m_shader->setUniform(GLShader::Mat4Uniform::ModelViewProjectionMatrix, mvp);
     m_shader->setUniform("sampler", 0);
     
-    // Bind our captured texture
-    m_texture->bind();
-    
-    // Render a full-screen quad
+    // Render the texture to screen
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     
-    // Create vertex data for a full-screen quad
     const QRectF target = QRectF(0, 0, screenSize.width(), screenSize.height());
-    const QRectF source = QRectF(0, 0, 1, 1);  // Normalized texture coordinates
+    m_texture->render(target, 1.0);
     
-    GLVertexBuffer *vbo = GLVertexBuffer::streamingBuffer();
-    vbo->reset();
-    vbo->setAttribLayout(std::span(GLVertexBuffer::GLVertex2DLayout), sizeof(GLVertex2D));
-    
-    GLVertex2D *verts = (GLVertex2D*)vbo->map(6 * sizeof(GLVertex2D));
-    if (verts) {
-        // First triangle
-        verts[0].position = QVector2D(target.left(), target.top());
-        verts[0].texcoord = QVector2D(source.left(), source.top());
-        verts[1].position = QVector2D(target.right(), target.top());
-        verts[1].texcoord = QVector2D(source.right(), source.top());
-        verts[2].position = QVector2D(target.left(), target.bottom());
-        verts[2].texcoord = QVector2D(source.left(), source.bottom());
-        
-        // Second triangle
-        verts[3].position = QVector2D(target.right(), target.top());
-        verts[3].texcoord = QVector2D(source.right(), source.top());
-        verts[4].position = QVector2D(target.right(), target.bottom());
-        verts[4].texcoord = QVector2D(source.right(), source.bottom());
-        verts[5].position = QVector2D(target.left(), target.bottom());
-        verts[5].texcoord = QVector2D(source.left(), source.bottom());
-        
-        vbo->unmap();
-        vbo->render(GL_TRIANGLES);
-    }
-    
-    m_texture->unbind();
     glDisable(GL_BLEND);
     
     m_captureInProgress = false;
@@ -242,7 +202,6 @@ void WaymcaEffect::paintScreen(const RenderTarget &renderTarget, const RenderVie
 
 void WaymcaEffect::postPaintScreen()
 {
-    m_captureInProgress = false;
     effects->postPaintScreen();
 }
 

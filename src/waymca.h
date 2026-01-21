@@ -40,7 +40,6 @@ public Q_SLOTS:
 private:
     void loadShader();
     void updateShaderUniforms();
-    bool ensureResources();
     
     std::unique_ptr<GLShader> m_shader;
     std::unique_ptr<GLTexture> m_texture;
