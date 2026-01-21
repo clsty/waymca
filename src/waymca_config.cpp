@@ -40,4 +40,4 @@ void WaymcaEffectConfig::save()
 
 } // namespace KWin
 
-#include "moc_waymca_config.cpp"
+#include "waymca_config.moc"
