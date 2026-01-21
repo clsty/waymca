@@ -1,4 +1,5 @@
 File=waymca.kcfg
 ClassName=WaymcaConfig
+NameSpace=KWin
 Singleton=true
 Mutators=true

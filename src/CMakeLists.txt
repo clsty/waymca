@@ -22,6 +22,7 @@ set(WAYMCA_CONFIG_TARGET kwin_effect_waymca_config)
 
 set(waymca_config_SOURCES waymca_config.cpp)
 ki18n_wrap_ui(waymca_config_SOURCES waymca_config.ui)
+kconfig_add_kcfg_files(waymca_config_SOURCES waymcaconfig.kcfgc)
 
 add_library(${WAYMCA_CONFIG_TARGET} MODULE ${waymca_config_SOURCES})
 
@@ -29,6 +30,7 @@ target_link_libraries(${WAYMCA_CONFIG_TARGET}
     KWin::kwin
     Qt6::Widgets
     Qt6::Core
+    Qt6::DBus
     KF6::ConfigCore
     KF6::ConfigWidgets
     KF6::CoreAddons
